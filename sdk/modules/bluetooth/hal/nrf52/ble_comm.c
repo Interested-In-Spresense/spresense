@@ -2141,6 +2141,8 @@ void onHvx(BLE_Evt *pBleEvent, ble_evt_t *pBleNrfEvt)
   memcpy(evt.data, bleGattcEvtHvx->data, evt.length);
 
   ble_gatt_event_handler((struct bt_event_t *)&evt);
+
+  sd_ble_gattc_hv_confirm(evt.conn_handle, evt.char_handle); // return ack
 }
 
 static
@@ -2357,6 +2359,17 @@ void onPrimarySrvDiscoveryRsp(bleGattcDb *gattcDbDiscovery, BLE_Evt *pBleEvent, 
     }
 }
 
+static int nextCharDiscover(uint16_t conn_handle, uint16_t start, uint16_t end)
+{
+  ble_gattc_handle_range_t range = {0};
+
+  range.start_handle = start;
+  range.end_handle   = end;
+
+//  printf("nexxtCharDiscover: %04x - %04x\n", start,end);
+  return sd_ble_gattc_characteristics_discover(conn_handle, &range);
+}
+
 static
 void onCharacteristicDiscoveryRsp(bleGattcDb *const gattcDbDiscovery, BLE_Evt *pBleEvent, ble_evt_t *pBleNrfEvt)
 {
@@ -2444,7 +2457,9 @@ void onCharacteristicDiscoveryRsp(bleGattcDb *const gattcDbDiscovery, BLE_Evt *p
           gattcDbDiscovery->currCharInd = srvBeingDiscovered->charCount;
           // Perform another round of characteristic discovery.
           BLE_PRT2("onChar charDiscover\n");
-          (void)characteristicsDiscover(pBleEvent, gattcDbDiscovery);
+          nextCharDiscover(gattcDbDiscovery->dbDiscovery.connHandle,
+                           last_handle + 1,
+                           srvBeingDiscovered->srvHandleRange.endHandle);
         }
     }
   else
