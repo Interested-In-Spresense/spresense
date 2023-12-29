@@ -48,6 +48,10 @@
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
 /* name: bleutil_convert_uuid2str
  *       Convert BLE_UUID to string.
@@ -290,5 +294,9 @@ int bleutil_get_manufacturer_specific_data(uint8_t *data,
                                            uint8_t *company,
                                            uint8_t **specific_data,
                                            uint8_t *specific_datalen);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SDK_MODULES_INCLUDE_BLUETOOTH_BLE_UTIL_H */
